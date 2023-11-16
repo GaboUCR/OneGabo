@@ -6,7 +6,7 @@ use futures_util::{StreamExt, SinkExt};
 mod net;
 #[tokio::main]
 async fn main() {
-    print!("Server listening!!");
+    println!("Server listening!!");
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
     while let Ok((socket, _)) = listener.accept().await {
@@ -14,4 +14,3 @@ async fn main() {
         task::spawn(net::handle_connection(socket));   
     }
 }
-
