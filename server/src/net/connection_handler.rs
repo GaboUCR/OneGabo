@@ -3,7 +3,7 @@ use tokio_tungstenite::accept_async;
 use futures_util::{StreamExt, SinkExt};
 use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
-
+use chrono::{DateTime, Utc};
 enum MsgCode {
     InitialMessage = 0,
     CreateFile = 1,
@@ -25,8 +25,24 @@ impl MsgCode {
     }
 }
 
+struct File {
+    path : String,
+    date : DateTime<UTC>
+}
+
 pub async fn handle_connection(socket: TcpStream) {
+    // Obtener la dirección IP del cliente
+    let client_ip = match socket.peer_addr() {
+        Ok(addr) => addr.ip().to_string(),
+        Err(e) => {
+            eprintln!("Error al obtener la dirección IP del cliente: {:?}", e);
+            return;
+        }
+    };
+    // Se realiza el handshake
     let mut ws_stream = accept_async(socket).await.expect("Error on the websocket handshake");
+    // en este vector se guardan Structs de tipo file con los archivos que el usuario ha subido
+    let mut files = Vec::new(); 
 
     while let Some(message) = ws_stream.next().await {
         match message {
