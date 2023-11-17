@@ -5,10 +5,24 @@ use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 
 enum MsgCode {
-    InitialMessage,
-    CreateFile,
-    NewFile,
-    DeleteFile
+    InitialMessage = 0,
+    CreateFile = 1,
+    UpdateFile = 2,
+    NewFile = 3,
+    DeleteFile = 4
+}
+
+impl MsgCode {
+    fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            0 => Some(MsgCode::InitialMessage),
+            1 => Some(MsgCode::CreateFile),
+            2 => Some(MsgCode::UpdateFile),
+            3 => Some(MsgCode::NewFile),
+            4 => Some(MsgCode::DeleteFile),
+            _ => None,
+        }
+    }
 }
 
 pub async fn handle_connection(socket: TcpStream) {
@@ -17,22 +31,22 @@ pub async fn handle_connection(socket: TcpStream) {
     while let Some(message) = ws_stream.next().await {
         match message {
             Ok(msg) => {
-                if msg.is_binary() || msg.is_text() {
-                    // Suponiendo que el primer byte es el código del mensaje
-                    // println!("{}", msg.into_data().get(0).unwrap());
-                    if let Some(code) = msg.into_data().get(0) {
+                if let Some(code_byte) = msg.into_data().get(0) {
+                    if let Some(code) = MsgCode::from_byte(*code_byte) {
                         match code {
-                            0 => { ws_stream.send(Message::text("Respuesta 1234")).await.expect("Failed to send message");},
-                            1 => { /* Lógica para CreateFile */ },
-                            2 => { /* Lógica para NewFile */ },
-                            3 => { /* Lógica para DeleteFile */ },
-                            _ => eprintln!("Código de mensaje desconocido"),
+                            MsgCode::InitialMessage => {
+                                ws_stream.send(Message::text("Respuesta 1234")).await.expect("Failed to send message");
+                            },
+                            MsgCode::CreateFile => {},
+                            MsgCode::NewFile => {},
+                            MsgCode::DeleteFile => {},
+                            MsgCode::UpdateFile => {}
+                            // ... otros casos ...
                         }
+                    } else {
+                        eprintln!("Código de mensaje desconocido");
                     }
                 }
-
-                // Aquí puedes enviar una respuesta si es necesario
-                // ws_stream.send(Message::text("Respuesta")).await.expect("Failed to send message");
             }
             Err(e) => {
                 eprintln!("Error processing WebSocket message: {:?}", e);

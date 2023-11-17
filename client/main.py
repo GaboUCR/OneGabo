@@ -8,5 +8,5 @@ async def websocket_client():
         await websocket.send(binary_message)
         response = await websocket.recv()
         print(f"Received from server: {response}")
-
+        
 asyncio.run(websocket_client())
