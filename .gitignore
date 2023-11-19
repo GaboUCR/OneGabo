@@ -1,3 +1,5 @@
 server/target
 notes/*
 .vscode
+client/disk
+client/__pycache__
