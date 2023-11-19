@@ -1,9 +1,5 @@
 # OneGabo
 
-Certainly! Here's an explanation of the message format your WebSocket client is sending to the server, suitable for inclusion in your README file as part of the project documentation:
-
----
-
 ### WebSocket Message Format
 
 The client in our application sends messages to the server using the WebSocket protocol. Each message is structured in a specific format that enables the server to process and act upon it effectively. The format of the message is as follows:
