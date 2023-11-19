@@ -27,7 +27,7 @@ impl MsgCode {
 
 struct File {
     path : String,
-    date : DateTime<UTC>
+    date : DateTime<Utc>
 }
 
 pub async fn handle_connection(socket: TcpStream) {
@@ -42,32 +42,37 @@ pub async fn handle_connection(socket: TcpStream) {
     // Se realiza el handshake
     let mut ws_stream = accept_async(socket).await.expect("Error on the websocket handshake");
     // en este vector se guardan Structs de tipo file con los archivos que el usuario ha subido
-    let mut files = Vec::new(); 
+    let mut files: Vec<File> = Vec::new(); 
 
     while let Some(message) = ws_stream.next().await {
         match message {
             Ok(msg) => {
-                if let Some(code_byte) = msg.into_data().get(0) {
-                    if let Some(code) = MsgCode::from_byte(*code_byte) {
-                        match code {
-                            MsgCode::InitialMessage => {
-                                ws_stream.send(Message::text("Respuesta 1234")).await.expect("Failed to send message");
-                            },
-                            MsgCode::CreateFile => {},
-                            MsgCode::NewFile => {},
-                            MsgCode::DeleteFile => {},
-                            MsgCode::UpdateFile => {}
-                            // ... otros casos ...
+                    if (msg.is_binary()) {
+                        let mut msg_content = msg.into_data(); 
+                        println!("Mensaje recibido: {:?}", msg_content);
+                        if let Some(code) = MsgCode::from_byte(msg_content.remove(0)) {
+                            match code {
+                                MsgCode::InitialMessage => {
+                                    ws_stream.send(Message::text("Respuesta 1234")).await.expect("Failed to send message");
+                                },
+                                MsgCode::CreateFile => {},
+                                MsgCode::NewFile => {},
+                                MsgCode::DeleteFile => {},
+                                MsgCode::UpdateFile => {println!("{:?}", msg_content);}
+                                // ... otros casos ...
+                            }
+                        } else {
+                            eprintln!("Código de mensaje desconocido");
                         }
-                    } else {
-                        eprintln!("Código de mensaje desconocido");
                     }
+                    else {
+                        continue;
+                    }
+                    }
+                Err(e) => {
+                    eprintln!("Error processing WebSocket message: {:?}", e);
+                    break;
                 }
-            }
-            Err(e) => {
-                eprintln!("Error processing WebSocket message: {:?}", e);
-                break;
-            }
         }
     }
 }
