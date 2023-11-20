@@ -48,11 +48,11 @@ async fn handle_update_file (msg_content:Vec<u8>) {
     let filename_size = slice_to_int_le(&msg_content[4..8]) as usize;
     let filename_end_index = filename_size + 8;
 
-    let file_name = bytes_to_string_lossy(&msg_content[8..filename_end_index]);
+    let mut file_name = bytes_to_string_lossy(&msg_content[8..filename_end_index]);
     let data = &msg_content[filename_end_index..];
-
+    file_name.insert_str(0, "./drive/");
     println!("file name:{} \n file content: {}", file_name, bytes_to_string_lossy(data));
-    // save_bytes_to_file(data, file_path);
+    save_bytes_to_file(data, &file_name).await;
 }
 
 pub async fn handle_connection(socket: TcpStream) {

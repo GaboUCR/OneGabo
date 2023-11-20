@@ -3,3 +3,4 @@ notes/*
 .vscode
 client/disk
 client/__pycache__
+server/drive
