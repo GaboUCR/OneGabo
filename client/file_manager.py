@@ -13,12 +13,14 @@ class MsgCode (Enum):
 
 def get_files_info(directory_path):
     files_info = []
-    for filename in os.listdir(directory_path):
-        full_path = os.path.join(directory_path, filename)
-        if os.path.isfile(full_path):
-            modified_time = os.path.getmtime(full_path)
-            last_modified_date = datetime.datetime.fromtimestamp(modified_time)
-            files_info.append((filename, last_modified_date))
+    for root, dirs, files in os.walk(directory_path):
+        for filename in files:
+            full_path = os.path.join(root, filename)
+            if os.path.isfile(full_path):
+                modified_time = os.path.getmtime(full_path)
+                last_modified_date = datetime.datetime.fromtimestamp(modified_time)
+                relative_path = os.path.relpath(full_path, directory_path)
+                files_info.append((relative_path, last_modified_date))
     return files_info
 
 def build_message(operation_code, filename, file_content):
