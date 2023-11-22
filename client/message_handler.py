@@ -2,15 +2,16 @@ import struct
 from enum import Enum
 
 class MsgCode (Enum):
-    InitialMessage = 0,
-    CreateFile = 1,
-    UpdateFile = 2,
-    NewFile = 3,
+    InitialMessage = 0
+    CreateFile = 1
+    UpdateFile = 2
+    NewFile = 3
     DeleteFile = 4
 
-def create_update_message(operation_code, filename, file_content):
+def create_update_message(filename, file_content):
     # Empaquetar el código de operación (MsgCode.UpdateFile) en 4 bytes (little-endian)
-    operation_bytes = struct.pack('<I', operation_code)
+    code = MsgCode.UpdateFile.value
+    operation_bytes = struct.pack('<I', code)
 
     # Empaquetar el tamaño del nombre del archivo en 4 bytes (little-endian)
     filename_size_bytes = struct.pack('<I', len(filename))
