@@ -3,7 +3,7 @@ use tokio::net::TcpListener;
 use tokio_tungstenite::accept_async;
 use tokio_tungstenite::tungstenite::Error;
 use futures_util::{StreamExt, SinkExt};
-mod net;
+mod network;
 mod storage;
 
 #[tokio::main]
@@ -13,6 +13,6 @@ async fn main() {
 
     while let Ok((socket, _)) = listener.accept().await {
 
-        task::spawn(net::handle_connection(socket));   
+        task::spawn(network::handle_connection(socket));   
     }
 }

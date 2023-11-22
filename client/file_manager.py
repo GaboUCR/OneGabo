@@ -52,4 +52,4 @@ async def periodic_file_check(websocket, sent_files):
                     # Actualizar el diccionario con la nueva fecha de modificación
                     sent_files[filename] = modified_date
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(0.314)

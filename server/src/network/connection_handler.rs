@@ -5,7 +5,7 @@ use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 use chrono::{DateTime, Utc};
 use crate::storage::file_manager::{save_bytes_to_file, create_folder};
-use crate::net::ws_message_handler::{MsgCode, slice_to_int_le, bytes_to_string_lossy};
+use crate::network::ws_message_handler::{MsgCode, slice_to_int_le, bytes_to_string_lossy};
 use std::convert::TryInto;
 
 async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
