@@ -4,8 +4,9 @@ use futures_util::{StreamExt, SinkExt};
 use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 use chrono::{DateTime, Utc};
-use crate::storage::file_manager::save_bytes_to_file;
+use crate::storage::file_manager::{save_bytes_to_file, create_folder};
 use std::convert::TryInto;
+
 enum MsgCode {
     InitialMessage = 0,
     CreateFile = 1,
@@ -43,14 +44,19 @@ fn bytes_to_string_lossy(bytes: &[u8]) -> String {
     String::from_utf8_lossy(bytes).into_owned()
 }
 
-async fn handle_update_file (msg_content:Vec<u8>) {
+async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
 
     let filename_size = slice_to_int_le(&msg_content[4..8]) as usize;
     let filename_end_index = filename_size + 8;
 
     let mut file_name = bytes_to_string_lossy(&msg_content[8..filename_end_index]);
     let data = &msg_content[filename_end_index..];
-    file_name.insert_str(0, "./drive/");
+
+    let root = format!("./drive/{}/", ip_address);
+
+    create_folder(&root).await;
+
+    file_name.insert_str(0, &root);
     println!("file name:{} \n file content: {}", file_name, bytes_to_string_lossy(data));
     save_bytes_to_file(data, &file_name).await;
 }
@@ -82,7 +88,7 @@ pub async fn handle_connection(socket: TcpStream) {
                                 MsgCode::CreateFile => {},
                                 MsgCode::NewFile => {},
                                 MsgCode::DeleteFile => {},
-                                MsgCode::UpdateFile => {handle_update_file(msg_content).await;}
+                                MsgCode::UpdateFile => {handle_update_file(msg_content, &client_ip).await;}
                                 // ... otros casos ...
                             }
                         } else {
