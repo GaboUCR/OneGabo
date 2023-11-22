@@ -5,44 +5,8 @@ use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 use chrono::{DateTime, Utc};
 use crate::storage::file_manager::{save_bytes_to_file, create_folder};
+use crate::net::ws_message_handler::{MsgCode, slice_to_int_le, bytes_to_string_lossy};
 use std::convert::TryInto;
-
-enum MsgCode {
-    InitialMessage = 0,
-    CreateFile = 1,
-    UpdateFile = 2,
-    NewFile = 3,
-    DeleteFile = 4
-}
-
-impl MsgCode {
-    fn from_byte(byte: &[u8]) -> Option<Self> {
-
-        let code = slice_to_int_le(byte);
-        match code {
-            0 => Some(MsgCode::InitialMessage),
-            1 => Some(MsgCode::CreateFile),
-            2 => Some(MsgCode::UpdateFile),
-            3 => Some(MsgCode::NewFile),
-            4 => Some(MsgCode::DeleteFile),
-            _ => None,
-        }
-    }
-}
-
-struct File {
-    path : String,
-    date : DateTime<Utc>
-}
-
-fn slice_to_int_le(slice: &[u8]) -> i32 {
-    let (int_bytes, _) = slice.split_at(std::mem::size_of::<i32>());
-    i32::from_le_bytes(int_bytes.try_into().expect("slice with incorrect length"))
-}
-
-fn bytes_to_string_lossy(bytes: &[u8]) -> String {
-    String::from_utf8_lossy(bytes).into_owned()
-}
 
 async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
 
@@ -53,8 +17,6 @@ async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
     let data = &msg_content[filename_end_index..];
 
     let root = format!("./drive/{}/", ip_address);
-
-    create_folder(&root).await;
 
     file_name.insert_str(0, &root);
     println!("file name:{} \n file content: {}", file_name, bytes_to_string_lossy(data));
@@ -72,9 +34,7 @@ pub async fn handle_connection(socket: TcpStream) {
     };
     // Se realiza el handshake
     let mut ws_stream = accept_async(socket).await.expect("Error on the websocket handshake");
-    // en este vector se guardan Structs de tipo file con los archivos que el usuario ha subido
-    let mut files: Vec<File> = Vec::new(); 
-
+    
     while let Some(message) = ws_stream.next().await {
         match message {
             Ok(msg) => {
