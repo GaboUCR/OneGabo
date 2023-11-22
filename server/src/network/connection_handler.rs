@@ -4,7 +4,7 @@ use futures_util::{StreamExt, SinkExt};
 use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 use chrono::{DateTime, Utc};
-use crate::storage::file_manager::{save_bytes_to_file, create_folder};
+use crate::storage::file_manager::{save_bytes_to_file, create_folder, delete_file};
 use crate::network::ws_message_handler::{MsgCode, slice_to_int_le, bytes_to_string_lossy};
 use std::convert::TryInto;
 
@@ -13,14 +13,23 @@ async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
     let filename_size = slice_to_int_le(&msg_content[4..8]) as usize;
     let filename_end_index = filename_size + 8;
 
-    let mut file_name = bytes_to_string_lossy(&msg_content[8..filename_end_index]);
+    let mut file_path = bytes_to_string_lossy(&msg_content[8..filename_end_index]);
     let data = &msg_content[filename_end_index..];
 
     let root = format!("./drive/{}/", ip_address);
 
-    file_name.insert_str(0, &root);
-    println!("file name:{} \n file content: {}", file_name, bytes_to_string_lossy(data));
-    save_bytes_to_file(data, &file_name).await;
+    file_path.insert_str(0, &root);
+    println!("file name:{} \n file content: {}", file_path, bytes_to_string_lossy(data));
+    save_bytes_to_file(data, &file_path).await;
+}
+
+async fn handle_delete_file (msg_content:Vec<u8>, ip_address: &str) {
+
+    let mut file_path = bytes_to_string_lossy(&msg_content[4..]);
+    let root = format!("./drive/{}/", ip_address);
+    file_path.insert_str(0, &root);
+
+    delete_file(&file_path).await;
 }
 
 pub async fn handle_connection(socket: TcpStream) {
@@ -47,7 +56,7 @@ pub async fn handle_connection(socket: TcpStream) {
                                 },
                                 MsgCode::CreateFile => {},
                                 MsgCode::NewFile => {},
-                                MsgCode::DeleteFile => {},
+                                MsgCode::DeleteFile => {handle_delete_file(msg_content, &client_ip).await;},
                                 MsgCode::UpdateFile => {handle_update_file(msg_content, &client_ip).await;}
                                 // ... otros casos ...
                             }
