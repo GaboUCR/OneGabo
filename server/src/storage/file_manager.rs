@@ -15,16 +15,20 @@ pub async fn create_folder (path:&str) -> io::Result<()> {
     Ok(())
 }
 
+pub async fn delete_file(file_path: &str) -> io::Result<()> {
+    let path = Path::new(file_path);
+    
+    if path.exists() {
+        fs::remove_file(path).await
+    } else {
+        Err(io::Error::new(io::ErrorKind::NotFound, "File not found"))
+    }
+}
+
 pub async fn save_bytes_to_file(data: &[u8], file_path: &str) -> io::Result<()> {
     let path = Path::new(file_path);
 
-    // Attempt to create the directory
-    if let Some(dir) = path.parent() {
-        if let Err(e) = fs::create_dir_all(dir).await {
-            eprintln!("Failed to create directory {}: {}", dir.display(), e);
-            return Err(e);
-        }
-    }
+    create_folder(file_path).await;
 
     // Attempt to create the file
     let mut file = match File::create(path).await {
