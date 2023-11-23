@@ -2,7 +2,20 @@ import os
 import datetime
 import asyncio
 from message_handler import create_update_message, create_delete_message
+import pickle
 
+def save_state_to_disk(sent_files, sent_folders, file_path='app_state.pkl'):
+    with open(file_path, 'wb') as file:
+        pickle.dump({'sent_files': sent_files, 'sent_folders': sent_folders}, file)
+
+def load_state_from_disk(file_path='app_state.pkl'):
+    try:
+        with open(file_path, 'rb') as file:
+            state = pickle.load(file)
+            return state['sent_files'], state['sent_folders']
+    except (FileNotFoundError, EOFError, pickle.UnpicklingError):
+        return {}, set()  # Return empty structures if loading fails
+    
 def get_files_and_folders_info(directory_path):
     files_info = []
     folders_info = []
@@ -52,5 +65,7 @@ async def periodic_file_check(websocket, sent_files, sent_folders):
         # Adding new files if there's any
         for folder_path in current_folders_info:
             sent_folders.add(folder_path)
+
+        save_state_to_disk(sent_files, sent_folders)
 
         await asyncio.sleep(0.314)
