@@ -15,13 +15,19 @@ pub async fn create_folder (path:&str) -> io::Result<()> {
     Ok(())
 }
 
-pub async fn delete_file(file_path: &str) -> io::Result<()> {
+pub async fn delete_file_or_directory(file_path: &str) -> io::Result<()> {
     let path = Path::new(file_path);
     
     if path.exists() {
-        fs::remove_file(path).await
+        if path.is_dir() {
+            // Recursively delete the directory and all its contents
+            fs::remove_dir_all(path).await
+        } else {
+            // Delete a single file
+            fs::remove_file(path).await
+        }
     } else {
-        Err(io::Error::new(io::ErrorKind::NotFound, "File not found"))
+        Err(io::Error::new(io::ErrorKind::NotFound, "File or directory not found"))
     }
 }
 

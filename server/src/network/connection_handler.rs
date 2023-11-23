@@ -4,7 +4,7 @@ use futures_util::{StreamExt, SinkExt};
 use tokio_tungstenite::tungstenite::Error;
 use tungstenite::Message;
 use chrono::{DateTime, Utc};
-use crate::storage::file_manager::{save_bytes_to_file, create_folder, delete_file};
+use crate::storage::file_manager::{save_bytes_to_file, create_folder, delete_file_or_directory};
 use crate::network::ws_message_handler::{MsgCode, slice_to_int_le, bytes_to_string_lossy};
 use std::convert::TryInto;
 
@@ -29,7 +29,7 @@ async fn handle_delete_file (msg_content:Vec<u8>, ip_address: &str) {
     let root = format!("./drive/{}/", ip_address);
     file_path.insert_str(0, &root);
 
-    delete_file(&file_path).await;
+    delete_file_or_directory(&file_path).await;
 }
 
 pub async fn handle_connection(socket: TcpStream) {
