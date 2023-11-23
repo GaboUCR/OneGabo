@@ -5,7 +5,7 @@ use tokio_tungstenite::tungstenite::Error;
 use futures_util::{StreamExt, SinkExt};
 mod network;
 mod storage;
-
+mod handlers;
 #[tokio::main]
 async fn main() {
     println!("Server listening!!");
