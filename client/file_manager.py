@@ -34,15 +34,15 @@ def get_files_and_folders_info(directory_path):
     
     return (files_info, folders_info)
 
-async def periodic_file_check(websocket, sent_files, sent_folders):
+async def periodic_file_check(websocket, sent_files, sent_folders, base_path):
     while True:
-        current_files_info, current_folders_info = get_files_and_folders_info("disk") 
+        current_files_info, current_folders_info = get_files_and_folders_info(base_path) 
         current_files_names = set([file_info[0] for file_info in current_files_info])
 
         # Check for new or modified files
         for filename, modified_date in current_files_info:
             if filename not in sent_files or sent_files[filename] != modified_date: # possible bug, only checks if dates are different
-                with open(os.path.join("disk", filename), 'rb') as file:
+                with open(os.path.join(base_path, filename), 'rb') as file:
                     file_content = file.read()
                     message = create_update_message(filename, file_content)
                     await websocket.send(message)
