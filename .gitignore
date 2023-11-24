@@ -6,3 +6,4 @@ client/__pycache__
 server/drive
 uno
 client/app_state.pkl
+client/test_env
