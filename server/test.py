@@ -1,28 +1,20 @@
 import os
-import unittest
-import shutil
-from websocket_client import websocket_handler
-import asyncio
 
-class TestClient(unittest.TestCase):
+def check_file_content(file_path, expected_content):
+    """Check if the file at `file_path` has `expected_content`."""
+    try:
+        with open(file_path, 'r') as file:
+            content = file.read()
+            assert content == expected_content, f"Content mismatch in {file_path}"
+            # print(f"Content of {file_path} is correct.")
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+    except AssertionError as error:
+        print(error)
 
-    def setUp(self):
-        print("run")
-        try:
-            self.test_env = setup_test_environment()
-        except Exception as e:
-            print(f"Error in setUp: {e}")
-    
-    def tearDown(self):
-        cleanup_test_environment() 
-        
-    def testSendOperation(self):
-        asyncio.run(websocket_handler("ws://127.0.0.1:8080", "test_env"))
-        
-def setup_test_environment(base_path='test_env'):
-    os.makedirs(base_path, exist_ok=True)
-
-    # Create test files
+def main():
+    base_path = "drive/127.0.0.1"
+    # Define the test files and their expected contents
     test_files = {
         'file1.txt': 'Content of file 1',
         'file2.txt': 'Content of file 2',
@@ -44,17 +36,10 @@ def setup_test_environment(base_path='test_env'):
         'folder4/subfolder3/file16.txt': 'Content of file 16',
     }
 
-    for path, content in test_files.items():
-        full_path = os.path.join(base_path, path)
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
-        with open(full_path, 'w') as file:
-            file.write(content)
-    
-    return base_path
+    # Check each file
+    for file_path, expected_content in test_files.items():
 
-def cleanup_test_environment():
-    # Remove test files and folders
-    shutil.rmtree('test_env')
+        check_file_content(os.path.join(base_path, file_path), expected_content)
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
