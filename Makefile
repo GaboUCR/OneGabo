@@ -3,10 +3,14 @@ all: server client
 server:
 	cd server && cargo run
 
-dev_server:
-	cd server && cargo run --release -- -A warnings
-
 client:
 	cd client && python3 main.py
+
+client_test:
+	cd client && python3 -m unittest test.py
+
+server_test:
+	cd server && python3 test.py
+
 
 .PHONY: all server client
