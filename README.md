@@ -55,32 +55,26 @@ The server will start and wait for connections from the client. When you run the
 
 ### WebSocket Message Format
 
-The client in our application sends messages to the server using the WebSocket protocol. Each message is structured in a specific format that enables the server to process and act upon it effectively. The format of the message is as follows:
+#### Overview
+Our application utilizes WebSocket for client-server communication, where the client sends structured messages for file operations. Each message follows a specific format enabling efficient processing by the server. There are two primary types of messages: File Update and File Deletion.
 
-1. **Operation Code (4 bytes)**:
-   - The first 4 bytes of the message represent an integer in little-endian format indicating the operation to be performed.
-   - Each operation corresponds to a value defined in the `MsgCode` enumeration.
+#### Message Types
 
-2. **Filename Size (4 bytes)**:
-   - The next 4 bytes represent another integer in little-endian format indicating the size of the filename.
-   - This size determines how many bytes of the message should be read to extract the filename.
+1. **File Update Message**: Used for creating or updating files on the server.
 
-3. **Filename (Variable length)**:
-   - The following bytes, the length of which is determined by the previous field, contain the filename.
-   - The filename is encoded in a text format (e.g., UTF-8).
+   - **Operation Code (4 bytes)**: An integer in little-endian format representing the operation (`UpdateFile`). Corresponds to the `MsgCode::UpdateFile` value.
+   - **Filename Size (4 bytes)**: An integer in little-endian format indicating the size of the filename.
+   - **Filename (Variable length)**: The filename in text format, length determined by the Filename Size field.
+   - **File Content (Variable length)**: The remaining part of the message contains the file content.
 
-4. **File Content (Remaining bytes)**:
-   - The rest of the message contains the actual file content.
-   - This part of the message will vary in length depending on the size of the file being sent.
+2. **File Deletion Message**: Used for deleting files or directories on the server.
 
-### Implementation Notes
+   - **Operation Code (4 bytes)**: An integer in little-endian format representing the operation (`DeleteFile`). Corresponds to the `MsgCode::DeleteFile` value.
+   - **File Path (Remaining bytes)**: The path of the file or directory to be deleted, in text format.
 
-- **Little-Endian Format**: The use of little-endian format for integers (operation code and filename size) ensures compatibility across different platforms and architectures.
 
-- **Modular Design**: The message is structured in a way that allows for easy parsing and flexibility in handling different types of file operations.
+#### Implementation Notes
 
-- **Error Handling**: The server implementation is expected to handle cases where the message format does not conform to this specification, such as incorrect operation codes or mismatched filename sizes.
-
-This message format is designed to facilitate efficient and clear communication between the client and server in our WebSocket-based file management system. 
-
----
+- **Little-Endian Format**: Integers (like operation codes and filename sizes) are in little-endian format for cross-platform compatibility.
+- **Error Handling**: The server is designed to handle incorrect message formats, such as invalid operation codes or mismatched filename sizes.
+- **Modular Design**: This structured approach allows for flexible handling of various file operations and clear parsing of messages.
