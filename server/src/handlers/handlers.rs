@@ -15,7 +15,7 @@ pub async fn handle_update_file (msg_content:Vec<u8>, ip_address: &str) {
     let root = format!("./drive/{}/", ip_address);
 
     file_path.insert_str(0, &root);
-    println!("file name:{} \n file content: {}", file_path, bytes_to_string_lossy(data));
+    // println!("file name:{} \n file content: {}", file_path, bytes_to_string_lossy(data));
     save_bytes_to_file(data, &file_path).await;
 }
 
