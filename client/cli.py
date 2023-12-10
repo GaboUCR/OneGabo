@@ -1,3 +1,4 @@
+#client/cli.py
 import argparse
 from websocket_client import websocket_handler
 import asyncio

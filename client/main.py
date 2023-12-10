@@ -1,3 +1,4 @@
+#client/main.py
 import asyncio
 from websocket_client import websocket_handler
 

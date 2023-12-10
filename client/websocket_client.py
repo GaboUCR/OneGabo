@@ -1,3 +1,4 @@
+#client/websocket_client.py
 from file_manager import periodic_file_check, load_state_from_disk
 import websockets
 import asyncio
