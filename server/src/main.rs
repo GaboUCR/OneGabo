@@ -6,6 +6,7 @@ use futures_util::{StreamExt, SinkExt};
 mod network;
 mod storage;
 mod handlers;
+mod authentication;
 #[tokio::main]
 async fn main() {
     println!("Server listening!!");
