@@ -4,6 +4,7 @@ notes/*
 client/disk
 client/__pycache__
 server/drive
+server/onegabo.db
 uno
 client/app_state.pkl
 client/test_env
