@@ -58,7 +58,7 @@ pub async fn add_user(user: User) -> Result<(), TokioRusqliteError> {
     }
 }
 
-pub async fn get_user(user: User) -> Result<bool, TokioRusqliteError> {
+pub async fn verify_user_credential (user: User) -> Result<bool, TokioRusqliteError> {
     let conn = AsyncConnection::open("onegabo.db").await?;
 
     let result = conn.call(move |conn| {
